@@ -58,12 +58,15 @@ Xcode Komut Satırı Araçları gerekir (`xcode-select --install`).
 
 ## Yeni sürüm yayınlama
 
-`v` ile başlayan bir etiket gönderildiğinde GitHub Actions uygulamayı derler, DMG'yi oluşturur ve Releases'e yükler:
+`VERSION` dosyasındaki sürümü değiştirip `main`'e göndermek yeterli. GitHub Actions uygulamayı derler, DMG'yi oluşturur, `v<sürüm>` etiketini açar ve Releases'e yükler:
 
 ```bash
-git tag v1.0.1
-git push origin v1.0.1
+echo "1.0.1" > VERSION
+git commit -am "Sürüm 1.0.1"
+git push
 ```
+
+`v1.0.1` gibi bir etiket göndermek ya da *Actions → Release DMG → Run workflow* ile elle başlatmak da aynı işi yapar.
 
 ## Notlar
 

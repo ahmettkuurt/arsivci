@@ -1,9 +1,12 @@
 name: Release DMG
 
-# "v1.0.0" gibi bir etiket gönderildiğinde (ya da Actions sekmesinden elle)
-# Arşivci derlenir, DMG oluşturulur ve GitHub Releases'e yüklenir.
+# VERSION dosyasındaki sürüm değiştiğinde, "v1.0.0" gibi bir etiket gönderildiğinde
+# ya da Actions sekmesinden elle başlatıldığında: Arşivci derlenir, DMG oluşturulur
+# ve GitHub Releases'e yüklenir.
 on:
   push:
+    branches: [main]
+    paths: [VERSION]
     tags: ["v*"]
   workflow_dispatch:
     inputs:
@@ -26,8 +29,10 @@ jobs:
         run: |
           if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
             V="${GITHUB_REF_NAME#v}"
-          else
+          elif [ -n "${{ github.event.inputs.version }}" ]; then
             V="${{ github.event.inputs.version }}"
+          else
+            V="$(tr -d '[:space:]' < VERSION)"
           fi
           echo "version=$V" >> "$GITHUB_OUTPUT"
           echo "tag=v$V" >> "$GITHUB_OUTPUT"
@@ -68,6 +73,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.ver.outputs.tag }}
+          target_commitish: ${{ github.sha }}
           name: Arşivci ${{ steps.ver.outputs.version }}
           body_path: build/notes.md
           files: build/Arsivci.dmg
