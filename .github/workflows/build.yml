@@ -1,0 +1,29 @@
+name: Build
+
+# Her gönderimde uygulamanın derlendiğini ve DMG'nin oluştuğunu kontrol eder (yayınlamaz).
+on:
+  push:
+    branches: [main]
+    paths-ignore: ["**.md", "docs/**", "VERSION"]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Uygulamayı derle
+        run: |
+          swift --version
+          bash scripts/build-app.sh 0.0.0-ci
+      - name: Gömülü 7-Zip'i kontrol et
+        run: |
+          "build/Arşivci.app/Contents/MacOS/7zz" i | head -5
+          lipo -archs "build/Arşivci.app/Contents/MacOS/Arsivci"
+      - name: DMG oluştur
+        run: |
+          python3 -m pip install --quiet --break-system-packages dmgbuild || python3 -m pip install --quiet dmgbuild
+          tiffutil -cathidpicheck Resources/dmg-background.png Resources/dmg-background@2x.png -out build/background.tiff
+          python3 -m dmgbuild -s scripts/dmg-settings.py -D app="build/Arşivci.app" -D background=build/background.tiff "Arşivci" build/Arsivci.dmg
+          hdiutil verify build/Arsivci.dmg
+          ls -lh build/Arsivci.dmg

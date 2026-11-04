@@ -60,6 +60,8 @@ jobs:
 
           Mac için her dosya türüyle çalışan arşiv uygulaması: **sıkıştır · aç · çıkar**.
 
+          7-Zip uygulamanın içinde gelir; ek kurulum gerekmez. Değişiklikler için CHANGELOG.md dosyasına bakın.
+
           ### İndir ve kur
           1. Aşağıdaki **Arsivci.dmg** dosyasını indirin ve çift tıklayın.
           2. Açılan pencerede **Arşivci**'yi **Uygulamalar** kartına sürükleyin.

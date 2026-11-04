@@ -16,8 +16,31 @@ enum Tools {
     static let gzip = "/usr/bin/gzip"
     static let bzip2 = "/usr/bin/bzip2"
 
-    static var sevenZip: String? {
+    /// Bilgisayarda kurulu 7-Zip (Homebrew vb.)
+    static let systemSevenZip: String? =
         ["/opt/homebrew/bin/7zz", "/usr/local/bin/7zz", "/opt/homebrew/bin/7z", "/usr/local/bin/7z"]
+            .first { FileManager.default.isExecutableFile(atPath: $0) }
+
+    /// Uygulamanın içine gömülü 7-Zip (Arşivci.app/Contents/MacOS/7zz)
+    static let bundledSevenZip: String? = {
+        guard let p = Bundle.main.path(forAuxiliaryExecutable: "7zz"),
+              FileManager.default.isExecutableFile(atPath: p) else { return nil }
+        return p
+    }()
+
+    /// Önce bilgisayardaki 7-Zip, yoksa uygulamadaki
+    static var sevenZip: String? { systemSevenZip ?? bundledSevenZip }
+
+    static var sevenZipSource: String {
+        if systemSevenZip != nil { return "7-ZIP (SİSTEM)" }
+        if bundledSevenZip != nil { return "7-ZIP (DAHİLİ)" }
+        return ""
+    }
+
+    /// RAR oluşturmak için RARLAB'ın lisanslı 'rar' aracı (kullanıcı kendisi kurar)
+    static var rar: String? {
+        ["/opt/homebrew/bin/rar", "/usr/local/bin/rar", "/Applications/rar/rar",
+         NSHomeDirectory() + "/rar/rar", NSHomeDirectory() + "/bin/rar"]
             .first { FileManager.default.isExecutableFile(atPath: $0) }
     }
     static var xz: String? {
@@ -172,23 +195,29 @@ enum Engine {
 }
 
 enum CompressFormat: String, CaseIterable, Identifiable {
-    case zip = "ZIP", sevenZ = "7Z", tgz = "TAR.GZ", txz = "TAR.XZ", tbz = "TAR.BZ2", tar = "TAR"
+    case zip = "ZIP", sevenZ = "7Z", rar = "RAR", tgz = "TAR.GZ", txz = "TAR.XZ", tbz = "TAR.BZ2", tar = "TAR"
     var id: String { rawValue }
+    /// RAR yalnızca bilgisayarda lisanslı 'rar' aracı varsa kullanılabilir
+    var isAvailable: Bool { self != .rar || Tools.rar != nil }
     var ext: String {
         switch self {
         case .zip: return "zip"
         case .sevenZ: return "7z"
+        case .rar: return "rar"
         case .tgz: return "tar.gz"
         case .txz: return "tar.xz"
         case .tbz: return "tar.bz2"
         case .tar: return "tar"
         }
     }
-    var supportsPassword: Bool { self == .zip || self == .sevenZ }
+    var supportsPassword: Bool { self == .zip || self == .sevenZ || self == .rar }
     var note: String {
         switch self {
         case .zip: return "Her bilgisayarda açılır. Paylaşmak için en güvenli seçim."
         case .sevenZ: return "En küçük boyut. Büyük klasörler için ideal."
+        case .rar: return Tools.rar != nil
+            ? "WinRAR biçimi (RAR5). Bilgisayarındaki lisanslı RAR aracıyla oluşturulur."
+            : "RAR oluşturmak için RARLAB'ın 'rar' aracı gerekir. Seçince nasıl kurulacağını göster."
         case .tgz: return "Linux ve sunucular için standart paket."
         case .txz: return "Çok yüksek sıkıştırma, biraz daha yavaş."
         case .tbz: return "Klasik Unix sıkıştırması."
@@ -292,6 +321,21 @@ final class ArchiveModel: ObservableObject {
         Tools.sevenZip == nil
             ? "\n\nİpucu: Daha fazla biçim için Terminal'de 'brew install sevenzip' kurabilirsiniz; Arşivci onu otomatik kullanır."
             : ""
+    }
+
+    static let rarHelp = """
+    RAR arşivi oluşturmak WinRAR'ın sahibi RARLAB'ın lisanslı 'rar' aracını gerektirir; \
+    lisansı gereği Arşivci'nin içine konamaz. RAR arşivlerini AÇMAK için bir şey gerekmez.
+
+    Kurmak için Terminal'de:
+      brew install --cask rar
+
+    Deneme süresi 40 gündür; sonrası için rarlab.com'dan lisans alıp 'rarreg.key' \
+    dosyasını ev klasörüne '.rarreg.key' adıyla koyun. Kurulumdan sonra Arşivci'yi yeniden açın.
+    """
+
+    func selectFormat(_ f: CompressFormat) {
+        if f.isAvailable { format = f } else { alertText = Self.rarHelp }
     }
 
     private func passwordHint(_ msg: String) -> String {
@@ -520,6 +564,10 @@ final class ArchiveModel: ObservableObject {
             alertText = "Şifreli 7Z oluşturmak için 7-Zip gerekli.\nTerminal'de: brew install sevenzip\n\nYa da biçimi ZIP seçin."
             return
         }
+        if format == .rar && Tools.rar == nil {
+            alertText = Self.rarHelp
+            return
+        }
 
         busy = true
         status = "Sıkıştırılıyor…"
@@ -538,7 +586,16 @@ final class ArchiveModel: ObservableObject {
         var result = RunResult(status: 0, out: "", err: "")
         let usePassword = format.supportsPassword && !password.isEmpty
 
-        if usePassword, let sz = Tools.sevenZip {
+        if format == .rar, let rar = Tools.rar {
+            // RARLAB 'rar' aracı ile RAR5 arşivi (şifre varsa dosya adları da gizlenir)
+            for dir in order {
+                var a = ["a", "-r", "-ma5", "-idq", "-y", "-x*.DS_Store"]
+                if usePassword { a.append("-hp" + password) }
+                a += [out.path] + groups[dir]!
+                result = await run(rar, a, cwd: URL(fileURLWithPath: dir))
+                if !result.ok { break }
+            }
+        } else if usePassword, let sz = Tools.sevenZip {
             // 7-Zip ile AES-256 şifreleme
             for dir in order {
                 var a = ["a", format == .zip ? "-tzip" : "-t7z", "-p" + password, "-xr!.DS_Store"]
@@ -563,7 +620,7 @@ final class ArchiveModel: ObservableObject {
             case .tgz: a += ["-z"]
             case .txz: a += ["-J"]
             case .tbz: a += ["-j"]
-            case .tar: break
+            case .tar, .rar: break
             }
             a += ["--exclude", ".DS_Store"]
             for dir in order { a += ["-C", dir] + groups[dir]! }

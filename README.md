@@ -23,7 +23,9 @@
 - **Seçerek çıkar:** Arşivin içeriğini listele, yalnızca istediğin dosyaları çıkar.
 - **Arşivi test et:** Bozuk olup olmadığını kontrol eder.
 - **Sürükle-bırak:** Pencereye, Dock simgesine ya da Finder'da *Birlikte Aç → Arşivci*.
-- Açık ve koyu mod, Türkçe arayüz, ek kurulum gerektirmez (macOS'un yerleşik `bsdtar` motorunu kullanır).
+- **7-Zip dahili:** Şifreli ZIP/7Z ve ek biçimler kutudan çıktığı gibi çalışır.
+- **RAR oluşturma:** Bilgisayarda lisanslı RAR aracı varsa otomatik etkinleşir.
+- Açık ve koyu mod, Türkçe arayüz.
 
 ## Kurulum
 
@@ -38,13 +40,26 @@
 
 **Gereksinim:** macOS 13 (Ventura) veya üstü · Apple Silicon ve Intel.
 
-## İsteğe bağlı: 7-Zip ile daha fazlası
+## 7-Zip dahili
 
-[Homebrew](https://brew.sh) ile 7-Zip kurulursa Arşivci onu otomatik kullanır: DMG/WIM gibi ek biçimler, AES-256 şifreli ZIP ve şifreli 7Z.
+Arşivci, [7-Zip](https://www.7-zip.org)'i uygulamanın içinde taşır; ek bir şey kurmanız gerekmez.
+Bilgisayarınızda zaten 7-Zip varsa (ör. `brew install sevenzip`) Arşivci onu kullanır, yoksa
+kendi içindekini kullanır. Bu sayede AES-256 şifreli ZIP, şifreli 7Z ve DMG/WIM gibi ek biçimler
+her zaman hazırdır. Hangi motorun kullanıldığı pencerenin alt şeridinde görünür.
+
+## RAR oluşturma
+
+RAR arşivlerini **açmak** için hiçbir şey gerekmez. RAR arşivi **oluşturmak** ise WinRAR'ın
+sahibi RARLAB'ın lisanslı `rar` aracını gerektirir; lisansı gereği bu araç Arşivci'nin içine
+konamaz. Kurmak için:
 
 ```bash
-brew install sevenzip
+brew install --cask rar
 ```
+
+Kurulduktan sonra Arşivci'yi yeniden açın; biçim listesindeki **RAR** kilidi kalkar.
+Deneme süresi 40 gündür. Sürekli kullanım için [rarlab.com](https://www.rarlab.com)'dan lisans
+alıp size gönderilen `rarreg.key` dosyasını ev klasörünüze `.rarreg.key` adıyla koyun.
 
 ## Kaynaktan derleme
 
@@ -70,14 +85,15 @@ git push
 
 ## Notlar
 
-- RAR **oluşturma** desteklenmez (RAR biçimi lisanslıdır); RAR açma tam desteklenir.
-- 7-Zip kurulu değilken şifreli ZIP, macOS'un yerleşik `zip` aracıyla klasik ZipCrypto kullanır.
+- 7-Zip © Igor Pavlov, GNU LGPL lisansıyla dahildir — bkz. [ThirdParty](ThirdParty/).
+- RAR, win.rar GmbH'nin tescilli biçimidir.
 
 ## Proje yapısı
 
 ```
 Sources/     Swift kaynak kodu (Arsivci.swift: arşiv motoru, Arayuz.swift: arayüz)
 Resources/   Info.plist, logo, DMG arka planı
+ThirdParty/  Dahil edilen 7-Zip'in lisansı
 scripts/     build-app.sh (derleme), dmg-settings.py (DMG penceresi)
 .github/     Otomatik DMG + Release iş akışı
 ```

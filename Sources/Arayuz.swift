@@ -330,7 +330,8 @@ struct StatusBar: View {
                 .lineLimit(1)
                 .truncationMode(.middle)
             Spacer()
-            Text(Tools.sevenZip == nil ? "MOTOR · BSDTAR" : "MOTOR · BSDTAR + 7-ZIP")
+            Text(Tools.sevenZip == nil ? "MOTOR · BSDTAR"
+                 : "MOTOR · BSDTAR + \(Tools.sevenZipSource)" + (Tools.rar != nil ? " + RAR" : ""))
                 .font(.system(size: 11, weight: .heavy, design: .monospaced))
                 .foregroundStyle(Theme.bg.opacity(0.7))
             Rectangle().fill(Theme.bg.opacity(0.35)).frame(width: 1.5, height: 14)
@@ -439,7 +440,7 @@ struct CompressView: View {
             Eyebrow(text: "Biçim")
             LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
                 ForEach(CompressFormat.allCases) { f in
-                    FormatChip(format: f, selected: model.format == f) { model.format = f }
+                    FormatChip(format: f, selected: model.format == f) { model.selectFormat(f) }
                 }
             }
             Text(model.format.note)
@@ -491,17 +492,24 @@ struct FormatChip: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
-        Button(action: action) {
-            Text(format.rawValue)
-                .font(.system(size: 13, weight: .heavy, design: .monospaced))
-                .foregroundStyle(selected ? Theme.onPop : Theme.ink)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 10)
-                .brutal(selected ? Theme.yellow : Theme.surface, radius: 8, offset: selected ? 3 : 0, line: selected ? 2.5 : 2)
-                .contentShape(Rectangle())
+        let available = format.isAvailable
+        return Button(action: action) {
+            HStack(spacing: 5) {
+                if !available {
+                    Image(systemName: "lock.fill").font(.system(size: 10, weight: .bold))
+                }
+                Text(format.rawValue)
+                    .font(.system(size: 13, weight: .heavy, design: .monospaced))
+            }
+            .foregroundStyle(selected ? Theme.onPop : (available ? Theme.ink : Theme.muted))
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 10)
+            .brutal(selected ? Theme.yellow : Theme.surface, radius: 8, offset: selected ? 3 : 0, line: selected ? 2.5 : 2)
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("Biçim \(format.rawValue)")
+        .help(available ? format.note : "RAR aracı kurulu değil — nasıl kurulacağını görmek için tıkla")
+        .accessibilityLabel(available ? "Biçim \(format.rawValue)" : "Biçim \(format.rawValue), kurulu değil")
         .accessibilityAddTraits(selected ? .isSelected : [])
         .animation(reduceMotion ? nil : .spring(response: 0.2, dampingFraction: 0.7), value: selected)
     }
@@ -735,7 +743,9 @@ func showAboutPanel() {
         attributes: [.font: NSFont.systemFont(ofSize: 12, weight: .bold),
                      .foregroundColor: NSColor.labelColor])
     credits.append(NSAttributedString(
-        string: "Mac için her dosya türüyle çalışan arşiv uygulaması.\nSıkıştır · Aç · Çıkar",
+        string: "Mac için her dosya türüyle çalışan arşiv uygulaması.\nSıkıştır · Aç · Çıkar\n\n"
+            + "7-Zip © Igor Pavlov — GNU LGPL lisansıyla uygulamaya dahildir (7-zip.org).\n"
+            + "RAR, win.rar GmbH'nin tescilli biçimidir.",
         attributes: [.font: NSFont.systemFont(ofSize: 11),
                      .foregroundColor: NSColor.secondaryLabelColor]))
     let center = NSMutableParagraphStyle()

@@ -1,5 +1,11 @@
 # Değişiklik Günlüğü
 
+## 1.1.0 — 2026-11-04
+
+- 7-Zip artık uygulamanın içinde: şifreli ZIP (AES-256), şifreli 7Z ve ek biçimler ek kurulum olmadan çalışır. Bilgisayarda 7-Zip kuruluysa o tercih edilir.
+- RAR oluşturma: bilgisayarda lisanslı RAR aracı varsa RAR biçimi etkinleşir; yoksa nasıl kurulacağı gösterilir.
+- Hakkında penceresine 7-Zip lisans bilgisi eklendi.
+
 ## 1.0.0 — 2026-11-04
 
 İlk sürüm.
