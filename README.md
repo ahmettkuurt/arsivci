@@ -74,7 +74,7 @@ Xcode Komut Satırı Araçları gerekir (`xcode-select --install`).
 ## Sürümler otomatik
 
 `main`'e kod içeren her gönderimde GitHub Actions sürüm numarasını kendiliğinden bir artırır
-(1.1.0 → 1.1.1 → 1.1.2…), uygulamayı derler, DMG'yi oluşturur ve Releases'e yükler.
+(1.1.8 → 1.1.9 → 1.2.0…; her hane 9'dan sonra bir üst haneye geçer), uygulamayı derler, DMG'yi oluşturur ve Releases'e yükler.
 Sürüm notları o sürümdeki commit mesajlarından otomatik hazırlanır. Yalnızca README veya
 `docs/` değişiklikleri yeni sürüm oluşturmaz.
 

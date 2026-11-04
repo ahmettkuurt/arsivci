@@ -1,6 +1,6 @@
 name: Release DMG
 
-# main'e kod içeren her gönderimde sürüm otomatik bir artar (1.1.0 → 1.1.1),
+# main'e kod içeren her gönderimde sürüm otomatik bir artar (1.0.9 → 1.1.0 → 1.1.1…),
 # Arşivci derlenir, DMG oluşturulur ve GitHub Releases'e yüklenir.
 # Büyük sürüm atlamak için VERSION dosyasını değiştirin (ör. 2.0.0).
 # Yalnızca belge değişiklikleri (README, docs/) yeni sürüm oluşturmaz.
@@ -44,8 +44,13 @@ jobs:
           elif [ "$(printf '%s\n%s\n' "$LAST" "$FILEV" | sort -V | tail -1)" != "$LAST" ]; then
             V="$FILEV"            # VERSION dosyası son sürümden ileride: onu kullan
           else
+            # Otomatik artır: her hane 0-9 arası, 9'dan sonra bir üst haneye geçer
+            # (1.0.9 → 1.1.0, 1.9.9 → 2.0.0)
             IFS=. read -r MA MI PA <<< "$LAST"
-            V="$MA.$MI.$((PA + 1))"   # otomatik artır
+            PA=$((PA + 1))
+            if [ "$PA" -gt 9 ]; then PA=0; MI=$((MI + 1)); fi
+            if [ "$MI" -gt 9 ]; then MI=0; MA=$((MA + 1)); fi
+            V="$MA.$MI.$PA"
           fi
           echo "Önceki: $LAST → Yeni: $V"
           echo "version=$V" >> "$GITHUB_OUTPUT"
