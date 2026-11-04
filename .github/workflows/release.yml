@@ -1,0 +1,74 @@
+name: Release DMG
+
+# "v1.0.0" gibi bir etiket gönderildiğinde (ya da Actions sekmesinden elle)
+# Arşivci derlenir, DMG oluşturulur ve GitHub Releases'e yüklenir.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Sürüm (ör. 1.0.0)"
+        required: true
+        default: "1.0.0"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Sürümü belirle
+        id: ver
+        run: |
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            V="${GITHUB_REF_NAME#v}"
+          else
+            V="${{ github.event.inputs.version }}"
+          fi
+          echo "version=$V" >> "$GITHUB_OUTPUT"
+          echo "tag=v$V" >> "$GITHUB_OUTPUT"
+
+      - name: Uygulamayı derle
+        run: |
+          swift --version
+          bash scripts/build-app.sh "${{ steps.ver.outputs.version }}"
+
+      - name: DMG oluştur
+        run: |
+          python3 -m pip install --quiet --break-system-packages dmgbuild || python3 -m pip install --quiet dmgbuild
+          tiffutil -cathidpicheck Resources/dmg-background.png Resources/dmg-background@2x.png -out build/background.tiff
+          python3 -m dmgbuild -s scripts/dmg-settings.py \
+            -D app="build/Arşivci.app" \
+            -D background=build/background.tiff \
+            "Arşivci" build/Arsivci.dmg
+          hdiutil verify build/Arsivci.dmg
+          ls -lh build/Arsivci.dmg
+
+      - name: Sürüm notları
+        run: |
+          cat > build/notes.md <<'EOF'
+          ## Arşivci — Ahmet Kurt tarafından yapıldı
+
+          Mac için her dosya türüyle çalışan arşiv uygulaması: **sıkıştır · aç · çıkar**.
+
+          ### İndir ve kur
+          1. Aşağıdaki **Arsivci.dmg** dosyasını indirin ve çift tıklayın.
+          2. Açılan pencerede **Arşivci**'yi **Uygulamalar** kartına sürükleyin.
+          3. İlk açılışta "Apple doğrulayamadı" uyarısı çıkarsa:
+             **Sistem Ayarları → Gizlilik ve Güvenlik → yine de Aç**.
+
+          macOS 13 (Ventura) veya üstü · Apple Silicon ve Intel
+          EOF
+
+      - name: GitHub Release'e yükle
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.ver.outputs.tag }}
+          name: Arşivci ${{ steps.ver.outputs.version }}
+          body_path: build/notes.md
+          files: build/Arsivci.dmg
+          make_latest: true

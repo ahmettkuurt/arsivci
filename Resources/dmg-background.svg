@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 400" width="660" height="400">
+  <defs>
+    <pattern id="dots" width="22" height="22" patternUnits="userSpaceOnUse">
+      <circle cx="11" cy="11" r="1.6" fill="#111111" opacity="0.13"/>
+    </pattern>
+  </defs>
+  <rect width="660" height="400" fill="#FFF6E0"/>
+  <rect width="660" height="352" fill="url(#dots)"/>
+
+  <!-- Başlık -->
+  <text x="34" y="62" font-family="Inter Display" font-weight="900" font-size="34" fill="#111111" letter-spacing="1.5">ARŞİVCİ</text>
+  <rect x="34" y="72" width="64" height="6" fill="#FF6B6B"/>
+  <text x="108" y="79" font-family="DejaVu Sans Mono" font-weight="700" font-size="10" fill="#5C5446" letter-spacing="1">by AHMET KURT</text>
+  <g transform="translate(470 42) rotate(-3)">
+    <rect x="4" y="4" width="160" height="30" rx="6" fill="#111111"/>
+    <rect x="0" y="0" width="160" height="30" rx="6" fill="#4ECDC4" stroke="#111111" stroke-width="2.5"/>
+    <text x="80" y="20" text-anchor="middle" font-family="DejaVu Sans Mono" font-weight="700" font-size="12" fill="#111111">SÜRÜKLE &amp; KUR</text>
+  </g>
+
+  <!-- Uygulama kartı (sarı) -->
+  <rect x="81" y="114" width="180" height="200" rx="14" fill="#111111"/>
+  <rect x="75" y="108" width="180" height="200" rx="14" fill="#FFD23F" stroke="#111111" stroke-width="3"/>
+
+  <!-- Uygulamalar kartı (beyaz) -->
+  <rect x="411" y="114" width="180" height="200" rx="14" fill="#111111"/>
+  <rect x="405" y="108" width="180" height="200" rx="14" fill="#FFFFFF" stroke="#111111" stroke-width="3"/>
+
+  <!-- Ok -->
+  <g transform="translate(5 5)">
+    <path d="M276 188 H352 V170 L392 200 L352 230 V212 H276 Z" fill="#111111"/>
+  </g>
+  <path d="M276 188 H352 V170 L392 200 L352 230 V212 H276 Z" fill="#FF6B6B" stroke="#111111" stroke-width="3" stroke-linejoin="round"/>
+
+  <!-- Alt şerit -->
+  <rect y="352" width="660" height="48" fill="#111111"/>
+  <text x="24" y="381" font-family="DejaVu Sans Mono" font-weight="700" font-size="11" fill="#FFF6E0" letter-spacing="1">ZIP · RAR · 7Z · TAR · GZ · ISO</text>
+  <text x="636" y="381" text-anchor="end" font-family="DejaVu Sans Mono" font-weight="700" font-size="11" fill="#FFD23F" letter-spacing="1">AHMET KURT TARAFINDAN YAPILDI</text>
+</svg>

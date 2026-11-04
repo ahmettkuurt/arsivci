@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Neubrutalist Arşivci logosu: düz renk, kalın siyah çizgi, sert ofset gölge -->
+  <!-- Zemin: sarı squircle + sert gölge -->
+  <rect x="122" y="122" width="824" height="824" rx="185" fill="#111111"/>
+  <rect x="100" y="100" width="824" height="824" rx="185" fill="#FFD23F" stroke="#111111" stroke-width="20"/>
+
+  <!-- Nokta dokusu -->
+  <g fill="#111111" opacity="0.12">
+    <circle cx="230" cy="230" r="9"/><circle cx="300" cy="230" r="9"/><circle cx="230" cy="300" r="9"/>
+    <circle cx="794" cy="794" r="9"/><circle cx="724" cy="794" r="9"/><circle cx="794" cy="724" r="9"/>
+  </g>
+
+  <!-- Kutu gölgesi -->
+  <rect x="318" y="448" width="430" height="330" rx="22" fill="#111111"/>
+  <rect x="288" y="352" width="490" height="120" rx="22" fill="#111111"/>
+
+  <!-- Kutu gövdesi -->
+  <rect x="290" y="420" width="430" height="330" rx="22" fill="#FF6B6B" stroke="#111111" stroke-width="16"/>
+  <!-- Kapak -->
+  <rect x="260" y="324" width="490" height="120" rx="22" fill="#FF9A9A" stroke="#111111" stroke-width="16"/>
+
+  <!-- Fermuar şeridi -->
+  <rect x="477" y="332" width="56" height="410" fill="#111111"/>
+  <g fill="#FFF6E0">
+    <rect x="486" y="350" width="19" height="13" rx="2"/><rect x="505" y="371" width="19" height="13" rx="2"/>
+    <rect x="486" y="392" width="19" height="13" rx="2"/><rect x="505" y="413" width="19" height="13" rx="2"/>
+    <rect x="486" y="434" width="19" height="13" rx="2"/>
+    <rect x="480" y="566" width="17" height="13" rx="2"/><rect x="513" y="587" width="17" height="13" rx="2"/>
+    <rect x="480" y="608" width="17" height="13" rx="2"/><rect x="513" y="629" width="17" height="13" rx="2"/>
+    <rect x="480" y="650" width="17" height="13" rx="2"/><rect x="513" y="671" width="17" height="13" rx="2"/>
+    <rect x="480" y="692" width="17" height="13" rx="2"/><rect x="513" y="713" width="17" height="13" rx="2"/>
+  </g>
+
+  <!-- Fermuar sürgüsü (turkuaz) -->
+  <rect x="474" y="468" width="80" height="90" rx="16" fill="#111111"/>
+  <rect x="464" y="458" width="80" height="90" rx="16" fill="#4ECDC4" stroke="#111111" stroke-width="12"/>
+  <rect x="482" y="536" width="44" height="104" rx="22" fill="#4ECDC4" stroke="#111111" stroke-width="12"/>
+  <rect x="497" y="560" width="14" height="50" rx="7" fill="#111111"/>
+</svg>
