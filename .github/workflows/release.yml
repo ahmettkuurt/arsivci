@@ -1,19 +1,24 @@
 name: Release DMG
 
-# VERSION dosyasındaki sürüm değiştiğinde, "v1.0.0" gibi bir etiket gönderildiğinde
-# ya da Actions sekmesinden elle başlatıldığında: Arşivci derlenir, DMG oluşturulur
-# ve GitHub Releases'e yüklenir.
+# main'e kod içeren her gönderimde sürüm otomatik bir artar (1.1.0 → 1.1.1),
+# Arşivci derlenir, DMG oluşturulur ve GitHub Releases'e yüklenir.
+# Büyük sürüm atlamak için VERSION dosyasını değiştirin (ör. 2.0.0).
+# Yalnızca belge değişiklikleri (README, docs/) yeni sürüm oluşturmaz.
 on:
   push:
     branches: [main]
-    paths: [VERSION]
+    paths-ignore: ["**.md", "docs/**", "LICENSE*", ".gitignore"]
     tags: ["v*"]
   workflow_dispatch:
     inputs:
       version:
-        description: "Sürüm (ör. 1.0.0)"
-        required: true
-        default: "1.0.0"
+        description: "Sürüm (boş bırakılırsa otomatik artar)"
+        required: false
+        default: ""
+
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -23,19 +28,29 @@ jobs:
     runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # önceki sürüm etiketleri ve değişiklik listesi için
 
       - name: Sürümü belirle
         id: ver
         run: |
+          LAST="$(git tag -l 'v*' --sort=-v:refname | head -1)"
+          LAST="${LAST#v}"; [ -z "$LAST" ] && LAST="0.0.0"
+          FILEV="$(tr -d '[:space:]' < VERSION)"
           if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
             V="${GITHUB_REF_NAME#v}"
           elif [ -n "${{ github.event.inputs.version }}" ]; then
             V="${{ github.event.inputs.version }}"
+          elif [ "$(printf '%s\n%s\n' "$LAST" "$FILEV" | sort -V | tail -1)" != "$LAST" ]; then
+            V="$FILEV"            # VERSION dosyası son sürümden ileride: onu kullan
           else
-            V="$(tr -d '[:space:]' < VERSION)"
+            IFS=. read -r MA MI PA <<< "$LAST"
+            V="$MA.$MI.$((PA + 1))"   # otomatik artır
           fi
+          echo "Önceki: $LAST → Yeni: $V"
           echo "version=$V" >> "$GITHUB_OUTPUT"
           echo "tag=v$V" >> "$GITHUB_OUTPUT"
+          echo "last=$LAST" >> "$GITHUB_OUTPUT"
 
       - name: Uygulamayı derle
         run: |
@@ -64,7 +79,7 @@ jobs:
 
           Mac için her dosya türüyle çalışan arşiv uygulaması: **sıkıştır · aç · çıkar**.
 
-          7-Zip uygulamanın içinde gelir; ek kurulum gerekmez. Değişiklikler için CHANGELOG.md dosyasına bakın.
+          7-Zip uygulamanın içinde gelir; ek kurulum gerekmez.
 
           ### İndir ve kur
           1. Aşağıdaki **Arsivci.dmg** dosyasını indirin ve çift tıklayın.
@@ -73,7 +88,15 @@ jobs:
              **Sistem Ayarları → Gizlilik ve Güvenlik → yine de Aç**.
 
           macOS 13 (Ventura) veya üstü · Apple Silicon ve Intel
+
+          ### Bu sürümdeki değişiklikler
           EOF
+          if git rev-parse -q --verify "refs/tags/v${{ steps.ver.outputs.last }}" >/dev/null; then
+            RANGE="v${{ steps.ver.outputs.last }}..HEAD"
+          else
+            RANGE="HEAD"
+          fi
+          git log "$RANGE" --no-merges --format='- %s' | grep -v -E '^- Sürüm [0-9.]+$' >> build/notes.md || true
 
       - name: GitHub Release'e yükle
         uses: softprops/action-gh-release@v2

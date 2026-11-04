@@ -71,17 +71,20 @@ bash kur.sh            # build/Arsivci.dmg oluşturur
 
 Xcode Komut Satırı Araçları gerekir (`xcode-select --install`).
 
-## Yeni sürüm yayınlama
+## Sürümler otomatik
 
-`VERSION` dosyasındaki sürümü değiştirip `main`'e göndermek yeterli. GitHub Actions uygulamayı derler, DMG'yi oluşturur, `v<sürüm>` etiketini açar ve Releases'e yükler:
+`main`'e kod içeren her gönderimde GitHub Actions sürüm numarasını kendiliğinden bir artırır
+(1.1.0 → 1.1.1 → 1.1.2…), uygulamayı derler, DMG'yi oluşturur ve Releases'e yükler.
+Sürüm notları o sürümdeki commit mesajlarından otomatik hazırlanır. Yalnızca README veya
+`docs/` değişiklikleri yeni sürüm oluşturmaz.
+
+Büyük bir sürüme geçmek için `VERSION` dosyasını değiştirmeniz yeterli:
 
 ```bash
-echo "1.0.1" > VERSION
-git commit -am "Sürüm 1.0.1"
+echo "2.0.0" > VERSION
+git commit -am "Arşivci 2.0"
 git push
 ```
-
-`v1.0.1` gibi bir etiket göndermek ya da *Actions → Release DMG → Run workflow* ile elle başlatmak da aynı işi yapar.
 
 ## Notlar
 

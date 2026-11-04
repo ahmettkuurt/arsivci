@@ -1,11 +1,10 @@
 name: Build
 
-# Her gönderimde uygulamanın derlendiğini ve DMG'nin oluştuğunu kontrol eder (yayınlamaz).
+# Pull request'lerde uygulamanın derlendiğini ve DMG'nin oluştuğunu kontrol eder (yayınlamaz).
+# main'e yapılan gönderimler Release DMG iş akışında derlenip yayınlanır.
 on:
-  push:
-    branches: [main]
-    paths-ignore: ["**.md", "docs/**", "VERSION"]
   pull_request:
+  workflow_dispatch:
 
 jobs:
   build:
