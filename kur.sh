@@ -12,7 +12,11 @@ if ! python3 -c "import dmgbuild" 2>/dev/null; then
   python3 -m pip install --user --quiet dmgbuild 2>/dev/null \
     || python3 -m pip install --user --quiet --break-system-packages dmgbuild
 fi
-tiffutil -cathidpicheck Resources/dmg-background.png Resources/dmg-background@2x.png -out build/background.tiff >/dev/null
+# Retina arka planı 144 DPI olmalı; yoksa Finder resmi iki kat büyük gösterir
+cp Resources/dmg-background.png build/bg.png && cp Resources/dmg-background@2x.png build/bg@2x.png
+sips -s dpiWidth 72 -s dpiHeight 72 build/bg.png >/dev/null
+sips -s dpiWidth 144 -s dpiHeight 144 build/bg@2x.png >/dev/null
+tiffutil -cathidpicheck build/bg.png build/bg@2x.png -out build/background.tiff >/dev/null
 python3 -m dmgbuild -s scripts/dmg-settings.py \
   -D app="build/Arşivci.app" \
   -D background=build/background.tiff \
