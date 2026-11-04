@@ -2,6 +2,7 @@
 # Kullanım: dmgbuild -s scripts/dmg-settings.py -D app=build/Arşivci.app -D background=build/background.tiff "Arşivci" build/Arsivci.dmg
 # Finder'ı otomatikleştirmeden .DS_Store'u doğrudan yazar; GitHub Actions'ta güvenle çalışır.
 import os.path
+import unicodedata
 
 app = defines.get("app", "build/Arşivci.app")  # noqa: F821  (dmgbuild sağlar)
 app_name = os.path.basename(app)
@@ -39,9 +40,12 @@ label_pos = "bottom"
 text_size = 13
 icon_size = 128
 
+# Simge merkezleri (pencere içi nokta). Kartlar: x 75–255 / 405–585, y 108–308.
+APP_POS = (165, 185)
+APPS_POS = (495, 185)
+
 icon_locations = {
-    app_name: (165, 155),
-    "Uygulamalar": (495, 155),
+    "Uygulamalar": APPS_POS,
     # Gizli dosyaları göster açık olsa bile pencere dışında kalsınlar
     ".background": (1200, 1200),
     ".background.tiff": (1200, 1200),
@@ -49,3 +53,7 @@ icon_locations = {
     ".fseventsd": (1400, 1200),
     ".Trashes": (1500, 1200),
 }
+# "ş" gibi harfler DMG içinde ayrıştırılmış (NFD) biçimde saklanır; Finder adı birebir
+# eşleştirdiği için uygulama adını her iki Unicode biçimiyle de veriyoruz.
+for form in ("NFC", "NFD"):
+    icon_locations[unicodedata.normalize(form, app_name)] = APP_POS
